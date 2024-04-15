@@ -1,1 +1,1 @@
-# my-labs
+How to start minikube and connect to Lens
