@@ -55,6 +55,12 @@ systemctl start ssh
 ```
 
 
+     
+
+
+
+
+
 
 
 Start a Docker container named "master" based on the Ubuntu image and attach it to the custom network
