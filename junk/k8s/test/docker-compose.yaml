@@ -1,0 +1,13 @@
+version: '3'
+services:
+  database:
+    image: 'postgres:latest'
+    restart: always
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: oran
+      POSTGRES_PASSWORD: 123123
+    ports:
+      - '5433:5432'
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
