@@ -4,16 +4,16 @@ node {
     [$class: 'GenericTrigger',
      genericVariables: [
        [ key: 'committer_name', value: '$.pusher.name' ],
-       [ key: 'committer_email', value: '$.pusher.email' ],
-       [ key: 'ref', value: '$.ref'],
-       [ key: 'tag', value: '$.ref', regexpFilter: 'refs/tags/'],
-       [ key: 'commit', value: '$.after' ],
+       [ key: 'committer_email', value: '$.head_commit.author.email' ],
+       [ key: 'branch', value: '$.ref', regexpFilter: 'refs/heads/'],
+       [ key: 'source_branch', value: '$.before' ],
+       [ key: 'target_branch', value: '$.after' ],
        [ key: 'repo_name', value: '$.repository.name' ],
        [ key: 'owner_name', value: '$.repository.owner.login' ],
        [ key: 'clone_url', value: '$.repository.clone_url' ]
     ],
     
-    causeString: '$committer_name pushed tag $tag to $clone_url referencing $commit',
+    causeString: '$committer_name merged $source_branch into $target_branch in $clone_url',
     
     token: 'abc123',
     
@@ -21,7 +21,7 @@ node {
     printPostContent: true,
     
     regexpFilterText: '$ref',
-    regexpFilterExpression: '^refs/tags/.*'
+    regexpFilterExpression: '^refs/heads/.*'
    ]
   ])
  ])
@@ -30,15 +30,13 @@ node {
   deleteDir()
   sh '''
   echo git clone $clone_url
-  echo git checkout $commit
+  echo git checkout $target_branch
   sleep 1
   '''
  }
 
  stage("Build") {
   sh '''
-  echo Validate that artifact version is $tag
-  echo Or, set artifact version to $tag, without committing it or pushing!
   echo ./gradlew build
   sleep 2
   '''
@@ -55,24 +53,24 @@ node {
    def subject = ""
    def bodyText = ""
    if (currentBuild.currentResult == 'SUCCESS') {
-   subject = "Released $tag in $repo_slug"
+   subject = "Merged $source_branch into $target_branch in $repo_slug"
    bodyText = """
     Hi there!!
     
-    You pushed $tag in $clone_url and it is now released.
+    You merged $source_branch into $target_branch in $clone_url.
 
-    Version $tag was built from $commit
+    Version built from $target_branch
     
     See job here: $BUILD_URL
 
     See log here: $BUILD_URL/consoleText
     """
    } else {
-   subject = "Failed to release $tag in $repo_slug"
+   subject = "Failed to merge $source_branch into $target_branch in $repo_slug"
    bodyText = """
     Hi there!!
     
-    You pushed $tag in $clone_url and the release failed (${currentBuild.currentResult}).
+    You merged $source_branch into $target_branch in $clone_url and the merge failed (${currentBuild.currentResult}).
     
     See job here: $BUILD_URL
 
