@@ -5,9 +5,15 @@ node {
      genericVariables: [
        [ key: 'committer_name', value: '$.pusher.name' ],
        [ key: 'committer_email', value: '$.head_commit.author.email' ],
+<<<<<<< HEAD
        [ key: 'branch', value: '$.ref', regexpFilter: 'refs/heads/'],
        [ key: 'source_branch', value: '$.before' ],
        [ key: 'target_branch', value: '$.after' ],
+=======
+       [ key: 'ref', value: '$.ref'],
+       [ key: 'tag', value: '$.ref', regexpFilter: 'refs/tags/'],
+       [ key: 'commit', value: '$.after' ],
+>>>>>>> 869e39f1a3b138e1a97becd3cad626e9f4c47006
        [ key: 'repo_name', value: '$.repository.name' ],
        [ key: 'owner_name', value: '$.repository.owner.login' ],
        [ key: 'clone_url', value: '$.repository.clone_url' ]
