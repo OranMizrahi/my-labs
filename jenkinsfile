@@ -4,7 +4,7 @@ node {
     [$class: 'GenericTrigger',
      genericVariables: [
        [ key: 'committer_name', value: '$.pusher.name' ],
-       [ key: 'committer_email', value: '$.pusher.email' ],
+       [ key: 'committer_email', value: '$.head_commit.author.email' ],
        [ key: 'ref', value: '$.ref'],
        [ key: 'tag', value: '$.ref', regexpFilter: 'refs/tags/'],
        [ key: 'commit', value: '$.after' ],
