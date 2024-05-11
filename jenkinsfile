@@ -1,44 +1,89 @@
-import groovy.json.JsonSlurper
+node {
+ properties([
+  pipelineTriggers([
+    [$class: 'GenericTrigger',
+     genericVariables: [
+       [ key: 'committer_name', value: '$.pusher.name' ],
+       [ key: 'committer_email', value: '$.pusher.email' ],
+       [ key: 'ref', value: '$.ref'],
+       [ key: 'tag', value: '$.ref', regexpFilter: 'refs/tags/'],
+       [ key: 'commit', value: '$.after' ],
+       [ key: 'repo_name', value: '$.repository.name' ],
+       [ key: 'owner_name', value: '$.repository.owner.login' ],
+       [ key: 'clone_url', value: '$.repository.clone_url' ]
+    ],
+    
+    causeString: '$committer_name pushed tag $tag to $clone_url referencing $commit',
+    
+    token: 'abc123',
+    
+    printContributedVariables: true,
+    printPostContent: true,
+    
+    regexpFilterText: '$ref',
+    regexpFilterExpression: '^refs/tags/.*'
+   ]
+  ])
+ ])
 
-pipeline {
-    agent any
+ stage("Prepare") {
+  deleteDir()
+  sh '''
+  echo git clone $clone_url
+  echo git checkout $commit
+  sleep 1
+  '''
+ }
 
-    stages {
-        stage('Update Issue') {
-            steps {
-                script {
-                    // Define the issue key
-                    def issueKey = 'ci-1'
+ stage("Build") {
+  sh '''
+  echo Validate that artifact version is $tag
+  echo Or, set artifact version to $tag, without committing it or pushing!
+  echo ./gradlew build
+  sleep 2
+  '''
+ }
 
-                    // Define the new status
-                    def newStatus = 'Done'
+ stage("Upload") {
+  sh '''
+  echo Uploading...
+  sleep 1
+  '''
+ }
 
-                    // Update status using REST API
-                    def transitionId = getTransitionId(issueKey, newStatus)
+ stage("Email") {
+   def subject = ""
+   def bodyText = ""
+   if (currentBuild.currentResult == 'SUCCESS') {
+   subject = "Released $tag in $repo_slug"
+   bodyText = """
+    Hi there!!
+    
+    You pushed $tag in $clone_url and it is now released.
 
-                    if (transitionId != null) {
-                        def response = sh(script: "curl -u jirauser:Strongpassword1 -X POST -H 'Content-Type: application/json' -d '{\"transition\": {\"id\": \"${transitionId}\"}}' http://20.115.55.55:8090/rest/api/2/issue/${issueKey}/transitions", returnStdout: true)
-                        println "Response: ${response}"
-                    } else {
-                        println "Transition ID not found for ${newStatus}."
-                    }
-                }
-            }
-        }
-    }
-}
+    Version $tag was built from $commit
+    
+    See job here: $BUILD_URL
 
-def getTransitionId(issueKey, statusName) {
-    def response = sh(script: "curl -u jirauser:Strongpassword1 -X GET -H 'Content-Type: application/json' http://20.115.55.55:8090/rest/api/2/issue/${issueKey}/transitions", returnStdout: true).trim()
-    def jsonSlurper = new JsonSlurper()
-    def transitions = jsonSlurper.parseText(response)
+    See log here: $BUILD_URL/consoleText
+    """
+   } else {
+   subject = "Failed to release $tag in $repo_slug"
+   bodyText = """
+    Hi there!!
+    
+    You pushed $tag in $clone_url and the release failed (${currentBuild.currentResult}).
+    
+    See job here: $BUILD_URL
 
-    for (transition in transitions.transitions) {
-        println "Transition: ${transition}"
-        if (transition.to.name == statusName) {
-            return transition.id
-        }
-    }
+    See log here: $BUILD_URL/consoleText
+    """
+   }
+   echo "Sending email with subject '$subject' and content:\n$bodyText"
+   //emailext subject: subject
+   // to: "$committer_email",
+   // from: 'jenkins@company.com',
+   // body: bodyText
+ }
 
-    return null
 }
