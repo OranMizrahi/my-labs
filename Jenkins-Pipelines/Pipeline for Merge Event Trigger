@@ -9,6 +9,7 @@ node {
                  [key: 'merge_commit_sha', value: '$.after', regexpFilter: '.*'],
                  [key: 'repo_name', value: '$.repository.name'],
                  [key: 'owner_name', value: '$.repository.owner.login'],
+                 [key: 'owner_name', value: '$.repository.owner.login'],
                  [key: 'clone_url', value: '$.repository.clone_url']
              ],
              causeString: '$committer_name merged changes to $repo_name',
@@ -80,4 +81,3 @@ node {
         // body: bodyText
     }
 }
-

@@ -1,0 +1,32 @@
+node {
+    properties([
+        pipelineTriggers([
+            [$class: 'GenericTrigger',
+             genericVariables: [
+                 [key: 'committer_name', value: '$.pusher.name'],
+                 [key: 'committer_email', value: '$.head_commit.author.email'],
+                 [key: 'ref', value: '$.ref'],
+                 [key: 'merge_commit_sha', value: '$.after', regexpFilter: '.*'],
+                 [key: 'repo_name', value: '$.repository.name'],
+                 [key: 'owner_name', value: '$.repository.owner.login'],
+                 [key: 'commitMessage', value: '$.commits.message'],
+                 [key: 'clone_url', value: '$.repository.clone_url']
+             ],
+             causeString: '$committer_name merged changes to $repo_name',
+             token: 'abc123',
+             printContributedVariables: true,
+             printPostContent: true,
+             regexpFilterText: '$ref',
+             regexpFilterExpression: '^refs/heads/.*'
+            ]
+        ])
+    ])
+
+    stage("Check") {
+        sh '''
+        echo $commitMessage
+
+        '''
+    }
+
+}
