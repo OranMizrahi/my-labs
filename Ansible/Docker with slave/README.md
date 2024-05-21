@@ -157,4 +157,4 @@ You can reveal the questions or trying without.
   ```
 </details>
 
-If you got into the end you did a great job, but we devops like all to be as IaC so try to make a docker-compose.yaml 
+If you got into the end you did a great job, but we devops like all to be as IaC, oganizing this into a docker-compose.yaml will provide a more efficient and reproducible setup.
