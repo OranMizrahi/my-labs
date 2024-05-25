@@ -8,26 +8,29 @@ that contain inside this file Private Key, Certificate, Argo Tunel Token
 
 Lets get started creating our first tunnel by writing 
 ```
-cloudflared tunnel create {tunnel-name}
+cloudflared tunnel create <tunnel-name>
 ```
 
 you need to copy the tunnelID=UUID then create a yaml file inside .cloudflare folder 
 
 ```
 ---
-tunnel: {UUID}
-credentials-file: /home/{USER}/.cloudflared/{UUID}.json
+tunnel: <UUID>
+credentials-file: /home/<USER>/.cloudflared/<UUID>.json
 ingress:
-  - hostname: tunnel.<domain>
-    service: http://localhost:5000
+  - hostname: <the subdomain prefix>.<domain>
+    service: http://<localhost>:<port>
   - service: http_status:404
 ```
 
-This create the CNAME record on the DNS cloudflare 
+This create the CNAME record on the DNS cloudflare
+You need to profie the yaml path that we just configured notice config.yaml is the default
 ```
-cloudflared tunnel route dns {tunnel-name} test.{domain}
+cloudflared tunnel route dns <tunnel-name> <subdomain>.<domain>
 ```
-cloudflared tunnel --config {config.yaml} run {UUID}
+Now you run the tunnel with the config then you can access your local server from the internet
+```
+cloudflared tunnel --config <config.yaml> run <UUID>
+```
 
-this is the article I used
-https://hkamran.medium.com/cloudflare-remote-access-home-assistant-069e50ed2570
+

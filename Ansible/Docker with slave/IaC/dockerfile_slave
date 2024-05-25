@@ -1,0 +1,20 @@
+# Use the Ubuntu base image
+FROM ubuntu
+
+# Update package lists and install necessary packages
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y python3 openssh-server vim net-tools systemd
+
+# Configure SSH in the container
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    sed -i 's/#PubkeyAuthentication yes/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+
+# Set password for root user
+RUN passwd root
+
+# Restart SSH service
+RUN service ssh restart
+
+# Command to run when the container starts
+CMD ["/bin/bash"]

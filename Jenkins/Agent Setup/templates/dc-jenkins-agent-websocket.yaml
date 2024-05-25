@@ -1,0 +1,17 @@
+#this is more sercure and better way to run 
+version: '3.7'
+services:
+  inbound-agent:
+    image: jforge/jenkins-inbound-agent
+    init: true
+    privileged: true
+    environment:
+    #Open .env file inside put the enviroment variables 
+      - JENKINS_URL=${JENKINS_MASTER_URL}
+      - JENKINS_SECRET=${JENKINS_AGENT_SECRET}
+      - JENKINS_AGENT_NAME=${JENKINS_AGENT_NAME}
+      - JENKINS_WEB_SOCKET=true
+      - DIND=true   # Used to run docker in docker 
+      - TINI_SUBREAPER=true
+    depends_on:
+      - jenkins

@@ -1,0 +1,42 @@
+
+
+version: '3.8'
+
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    networks:
+      jenkins_network:
+        ipv4_address: 192.168.100.10
+
+# use docker compose -d {name-container}  | if you need to run specif container on compose file
+  jnlp-agent:
+    image: odavid/jenkins-jnlp-slave
+    environment:
+      - JENKINS_URL=http://192.168.100.10:8080
+      - JENKINS_SECRET=58cc1a3e047609189150a40cba90e6b248fe3a82eb4d1af5f3728c26ee3ea7ab
+      - JENKINS_AGENT_NAME=agent1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - jenkins_network
+    depends_on:
+      - jenkins
+    
+
+
+networks:
+  jenkins_network:
+    driver: bridge
+    ipam: # this called IP adress managment allow for advanced networking options inside docker-compose 
+      config:
+        - subnet: 192.168.100.0/24
+
+volumes:
+  jenkins_home:
