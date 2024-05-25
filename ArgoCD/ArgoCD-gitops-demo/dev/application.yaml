@@ -9,9 +9,10 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/argoproj/argocd-example-apps.git # Can point to either a Helm chart repo or a git repo.
+    repoURL: https://github.com/OranMizrahi/my-labs.git # Can point to either a Helm chart repo or a git repo.
     targetRevision: HEAD
-    path: guestbook
+    path: ArgoCD/ArgoCD-gitops-demo/dev
+
   destination:
     server: https://kubernetes.default.svc
     namespace: myapp
